@@ -2,6 +2,8 @@ import hashlib
 from flask import Flask, request, session, jsonify
 
 
+#######################API login and logout with SHA-256 hashing and Flask sessions#######################
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'super-secret' 

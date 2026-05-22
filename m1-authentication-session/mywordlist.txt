@@ -1,0 +1,7 @@
+hello
+c
+c++
+perl
+python
+secret
+password

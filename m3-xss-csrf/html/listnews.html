@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global News Feed</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 30px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header-box { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .news-card { background: white; padding: 20px; margin-bottom: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .news-title { color: #333; margin-top: 0; }
+        .news-meta { font-size: 12px; color: #777; margin-bottom: 10px; }
+        .logout-btn { padding: 5px 15px; background-color: #DC3545; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-box">
+        <h2>Internal Portal Corporate News</h2>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+    
+    <div id="news-feed-container">Loading latest updates...</div>
+</div>
+
+<script>
+// Fetch news array immediately when the DOM window context loads
+window.onload = async function() {
+    const feedContainer = document.getElementById('news-feed-container');
+    
+    try {
+        // Fetch sends cookies implicitly if credentials modes match configuration policies
+        const response = await fetch('http://192.168.56.11:5000/listnews');
+        
+        if (response.status === 401 || response.status === 403) {
+            feedContainer.innerHTML = "<p style='color:red;'>Access Denied. Redirecting to authentication page...</p>";
+            setTimeout(() => { window.location.href = 'login.html'; }, 2000);
+            return;
+        }
+
+        const newsList = await response.json();
+        feedContainer.innerHTML = ""; // Clear loader placeholder
+
+        if (newsList.length === 0) {
+            feedContainer.innerHTML = "<p>No news updates found.</p>";
+            return;
+        }
+
+        newsList.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'news-card';
+    
+    // CRITICAL FLAW: Direct evaluation of raw API strings using innerHTML.
+    // Both title and content will now process executable HTML tags.
+    card.innerHTML = `
+        <h3 class="news-title">${item.id}</h3>
+        <div class="news-meta">Author ID: ${item.author || 'System'}</div>
+        <div class="news-body">${item.news}</div>
+    `;
+    feedContainer.appendChild(card);
+});
+
+    } catch (err) {
+        feedContainer.innerHTML = "<p style='color:red;'>Failed to pull news data stream from API provider backend.</p>";
+        console.error(err);
+    }
+};
+
+// Safe sanitization helper for fields you do NOT want compromised by XSS
+function escapeHTML(str) {
+    return str.replace(/[&<>'"]/g, 
+        tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+    );
+}
+
+function logout() {
+    // Simple mock logout redirection logic
+    window.location.href = 'login.html';
+}
+</script>
+
+</body>
+</html>
