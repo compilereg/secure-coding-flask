@@ -59,12 +59,15 @@ def get_ticket(ticket_id):
 @app.route('/tickets_sec/<ticket_id>', methods=['GET'])
 @jwt_required()
 def get_ticket_sec(ticket_id):
+    claims = get_jwt()
     ticket = tickets_db.get(ticket_id)
     username = get_jwt_identity()
+    userrole = claims.get("role")
     
     if not ticket:
         return jsonify({"error": "Ticket not found"}), 404
-    
+    if userrole == "admin":
+        return jsonify(ticket), 200    
     if ticket.get("username") != username:
         return jsonify({"error": "Access Denied: Unauthorized Object Reference"}), 403    
     # VULNERABLE: The API verifies the user is logged in (@jwt_required),
